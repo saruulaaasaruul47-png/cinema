@@ -1,7 +1,20 @@
 const express = require('express');
-const { addMovie } = require("../controllers/movie.controller");
-const workRouter = express.Router();
+const { 
+    addMovie,
+    seeAllMovies,
+    seeMovieById,
+    updateMovieController,
+    deleteMovieController
+} = require("../controllers/movie.controller");
+const movieRouter = express.Router();
 
-workRouter.post("/newmovie", addMovie);
+movieRouter.post("/newmovie", addMovie);
+movieRouter.get("/allmovies", seeAllMovies);
+movieRouter.get("/:id", seeMovieById);
+movieRouter.put("/:id", updateMovieController);
+movieRouter.delete("/:id", deleteMovieController);
 
-module.exports = workRouter;
+
+
+
+module.exports = movieRouter;
