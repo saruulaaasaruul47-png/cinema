@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
@@ -119,11 +120,49 @@ function App() {
     </>
   )
 =======
+=======
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+>>>>>>> 892283f8d99e147edb7f36aafe5402b955ca66b5
 import DashboardPage from './features/saihanaa-dashboard/DashboardPage'
+import { AuthProvider } from './features/chinguun-auth/context/AuthContext'
+import { ProtectedRoute } from './features/chinguun-auth/components/ProtectedRoute'
+import LoginPage from './features/chinguun-auth/pages/LoginPage'
+import RegisterPage from './features/chinguun-auth/pages/RegisterPage'
+import ProfilePage from './features/chinguun-auth/pages/ProfilePage'
 
 function App() {
+<<<<<<< HEAD
   return <DashboardPage />
 >>>>>>> c6e30be9c1fd962262ba33a28d426ed0e9f59516
+=======
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login"    element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  )
+>>>>>>> 892283f8d99e147edb7f36aafe5402b955ca66b5
 }
 
 export default App
