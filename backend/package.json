@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "backend",
   "version": "1.0.0",
   "description": "",
@@ -7,10 +8,30 @@
     "start": "nodemon app.js",
     "dev": "nodemon app.js",
     "test": "node --check app.js"
+=======
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-async-handler": "^1.2.0",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.22.4",
+    "nodemon": "^3.1.14"
+  },
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+>>>>>>> c6e30be9c1fd962262ba33a28d426ed0e9f59516
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+<<<<<<< HEAD
   "type": "commonjs",
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -24,4 +45,7 @@
     "node-cache": "^5.1.2",
     "nodemon": "^3.1.14"
   }
+=======
+  "type": "commonjs"
+>>>>>>> c6e30be9c1fd962262ba33a28d426ed0e9f59516
 }

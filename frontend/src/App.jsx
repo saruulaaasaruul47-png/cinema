@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
@@ -117,6 +118,12 @@ function App() {
       <section id="spacer"></section>
     </>
   )
+=======
+import DashboardPage from './features/saihanaa-dashboard/DashboardPage'
+
+function App() {
+  return <DashboardPage />
+>>>>>>> c6e30be9c1fd962262ba33a28d426ed0e9f59516
 }
 
 export default App
