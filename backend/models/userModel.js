@@ -1,10 +1,10 @@
-class User {
-    constructor(username, email, password, role = 'user') {
-        this.username = username;
-        this.email    = email;
-        this.password = password;
-        this.role     = role;
-    }
-}
+const toUserDTO = (user) => ({
+  id: user.id,
+  username: user.username,
+  email: user.email,
+  role: user.role,
+  profile_image: user.profile_image,
+  createdAt: user.created_at,
+});
 
-module.exports = User;
+module.exports = { toUserDTO };

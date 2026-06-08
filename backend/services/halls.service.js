@@ -1,52 +1,40 @@
 const {
-    findHall,
-    hallList,
-    createHall,
-    updateHall,
-    findHallById,
-    deleteHall
-} = require("../repository/halls.repository");
+  findHall,
+  hallList,
+  createHall,
+  updateHall,
+  findHallById,
+  deleteHall,
+} = require("../repositories/halls.repository");
 
-const Hall = require("../models/hallsModel");
+function createError(message, statusCode) {
+  const err = new Error(message);
+  err.statusCode = statusCode;
+  return err;
+}
 
-const asyncHandler = require("express-async-handler");
+const getHalls = async () => hallList();
 
-const getHalls = asyncHandler(async () => {
-    const halls = await hallList();
-    return halls;
-})
+const addHall = async (data) => {
+  const { hall_name, seat_count } = data;
+  const existing = await findHall(hall_name);
+  if (existing) throw createError("Hall already exist", 409);
 
-const addHall = asyncHandler(async (data) => {
-    const hall = new Hall(data.hall_name, data.seat_count)
-    const check = await findHall(hall.hall_name);
-    if (check) {
-        throw new TypeError("Hall already exist");
-    }
-    const addHall = await createHall(hall.hall_name, hall.seat_count);
-    return addHall;
+  return createHall(hall_name, seat_count);
+};
 
-})
+const updateHallService = async (id, data) => {
+  const hall = await findHallById(id);
+  if (!hall) throw createError("Hall not found", 404);
 
-const updateHallService = asyncHandler(
-    async (id, data) => {
-    const hall = await findHallById(id);
-    if (!hall) {
-        throw new Error("Hall not found");
-    }
-    const update = await updateHall(id, data.hall_name, data.seat_count);
-    return update;
-})
+  return updateHall(id, data.hall_name, data.seat_count);
+};
 
-const deleteHallService = asyncHandler(
-    async (id) => {
-        const deleteHallById = await deleteHall(id);
-        return deleteHallById;
-    }
-)
+const deleteHallService = async (id) => deleteHall(id);
 
 module.exports = {
-    getHalls,
-    addHall,
-    updateHallService,
-    deleteHallService
+  getHalls,
+  addHall,
+  updateHallService,
+  deleteHallService,
 };

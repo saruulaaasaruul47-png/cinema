@@ -1,58 +1,54 @@
-const { 
-    createMovie, 
-    findMovie, 
-    getAllMovies, 
-    getMovieById, 
-    updateMovie, 
-    deleteMovie 
-} = require("../repository/movie.repository");
+const {
+  createMovie,
+  findMovie,
+  getAllMovies,
+  getMovieById,
+  updateMovie,
+  deleteMovie,
+} = require("../repositories/movie.repository");
 
+function createError(message, statusCode) {
+  const err = new Error(message);
+  err.statusCode = statusCode;
+  return err;
+}
 
-const Movie = require("../models/movieModels");
-const asyncHandler = require("express-async-handler");
+const newMovie = async (data) => {
+  const { title, description, duration, release_date, director } = data;
+  const existing = await findMovie(title, director);
+  if (existing) throw createError("Movie already exist", 409);
 
-const newMovie = asyncHandler(async (data) => {
-    const movie = new Movie(data.title, data.description, data.duration, data.release_date, data.director);
-    const check = await findMovie(movie.title, movie.director);
-    if(check){
-        throw new TypeError("Movie already exist");
-    }
-    const addMovie = await createMovie(movie.title, movie.description, movie.duration, movie.release_date, movie.director)
-    return addMovie;
+  return createMovie(title, description, duration, release_date, director);
+};
 
-})
+const getMovies = async () => getAllMovies();
 
-const getMovies = asyncHandler(async () => {
-    const movies = await getAllMovies();
-    return movies;
-})
+const getMovieByIdService = async (id) => {
+  const movie = await getMovieById(id);
+  if (!movie) throw createError("Movie not found", 404);
+  return movie;
+};
 
-const getMovieByIdService = asyncHandler(
-    async (id) => {
-        const movie = await getMovieById(id);
-        return movie;
-    }
-)
+const updateMovieService = async (id, data) => {
+  const movie = await getMovieById(id);
+  if (!movie) throw createError("Movie not found", 404);
 
-const updateMovieService = asyncHandler(
-    async (id, data) => {
-        const movie = await getMovieById(id);
-        const update = await updateMovie(id, data.title, data.description, data.duration, data.release_date, data.director);
-        return update;
-    }
-)
+  return updateMovie(
+    id,
+    data.title,
+    data.description,
+    data.duration,
+    data.release_date,
+    data.director
+  );
+};
 
-const deleteMovieService = asyncHandler(
-    async (id) => {
-        const deleteMovieById = await deleteMovie(id);
-        return deleteMovieById;
-    }
-)
+const deleteMovieService = async (id) => deleteMovie(id);
 
-module.exports = { 
-    newMovie, 
-    getMovies, 
-    getMovieByIdService, 
-    updateMovieService, 
-    deleteMovieService 
+module.exports = {
+  newMovie,
+  getMovies,
+  getMovieByIdService,
+  updateMovieService,
+  deleteMovieService,
 };

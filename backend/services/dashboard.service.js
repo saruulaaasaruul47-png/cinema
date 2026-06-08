@@ -1,10 +1,7 @@
-const asyncHandler = require("express-async-handler");
-const { getDashboardAnalytics } = require("../repository/dashboard.repository");
+const { getDashboardAnalytics } = require("../repositories/dashboard.repository");
 
-const getAnalytics = asyncHandler(async () => {
-    return getDashboardAnalytics();
-});
+const getAnalytics = async () => getDashboardAnalytics();
 
 module.exports = {
-    getAnalytics
+  getAnalytics,
 };

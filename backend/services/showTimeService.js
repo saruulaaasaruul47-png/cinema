@@ -1,9 +1,8 @@
-const ShowTimeRepository = require("../repositories/ShowTimeRepository");
-const MovieRepository = require("../repositories/MovieRepository");
-const CinemaHallRepository = require("../repositories/CinemaHallRepository");
+const showtimeRepository = require("../repositories/showtime.repository");
+const movieRepository = require("../repositories/movie.repository");
+const hallsRepository = require("../repositories/halls.repository");
 const { parsePagination, buildPagination } = require("../utils/pagination");
 
-// Service layer дээр statusCode-той error үүсгээд controller-ийн error handler рүү дамжуулна.
 function createError(message, statusCode = 400, errors = null) {
   const error = new Error(message);
   error.statusCode = statusCode;
@@ -11,7 +10,6 @@ function createError(message, statusCode = 400, errors = null) {
   return error;
 }
 
-// Database-аас ирсэн genre string-ийг frontend-д хэрэглэх array хэлбэрт оруулна.
 function normalizeShowTime(row) {
   if (!row) return null;
 
@@ -21,7 +19,6 @@ function normalizeShowTime(row) {
   };
 }
 
-// Огноо хоосон эсвэл буруу format-тай эсэхийг шалгана.
 function validateDateTime(value, fieldName) {
   if (!value) return `${fieldName} is required`;
   const date = new Date(value);
@@ -29,7 +26,6 @@ function validateDateTime(value, fieldName) {
   return null;
 }
 
-// Create/update хийхийн өмнө шаардлагатай талбарууд болон цагийн дарааллыг шалгана.
 function validatePayload(payload) {
   const errors = {};
 
@@ -51,7 +47,6 @@ function validatePayload(payload) {
   }
 }
 
-// Frontend-ээс ирсэн query-г зөвшөөрөгдсөн filter/sort утгууд болгон цэвэрлэнэ.
 function buildFilters(query) {
   const allowedSorts = ["title", "start_time", "end_time", "duration", "release_date", "hall_name"];
   const sort = allowedSorts.includes(query.sort) ? query.sort : "start_time";
@@ -68,38 +63,34 @@ function buildFilters(query) {
   };
 }
 
-// Showtime жагсаалтыг filter, sort, pagination-тэй авч frontend-д тохирох бүтэцтэй буцаана.
 async function getShowTimes(query) {
   const pagination = parsePagination(query);
   const filters = buildFilters(query);
-  const { rows, total } = await ShowTimeRepository.findAll(filters, pagination);
+  const { rows, total } = await showtimeRepository.findAll(filters, pagination);
   const content = rows.map(normalizeShowTime);
 
   return buildPagination(content, pagination.page, pagination.size, total);
 }
 
-// id-аар нэг showtime хайж, байхгүй бол 404 error үүсгэнэ.
 async function getShowTimeById(id) {
-  const showTime = normalizeShowTime(await ShowTimeRepository.findById(id));
+  const showTime = normalizeShowTime(await showtimeRepository.findById(id));
   if (!showTime) throw createError("Show time not found", 404);
 
   return showTime;
 }
 
-// Showtime үүсгэх/засах үед сонгосон movie болон hall үнэхээр байгаа эсэхийг шалгана.
 async function ensureRelations(payload) {
   const [movie, hall] = await Promise.all([
-    MovieRepository.findById(payload.movie_id),
-    CinemaHallRepository.findById(payload.hall_id),
+    movieRepository.findById(payload.movie_id),
+    hallsRepository.findById(payload.hall_id),
   ]);
 
   if (!movie) throw createError("Movie not found", 404);
   if (!hall) throw createError("Cinema hall not found", 404);
 }
 
-// Нэг танхимд давхардсан цагийн хуваарь үүсэхээс хамгаална.
 async function ensureNoConflict(payload, ignoredShowTimeId = null) {
-  const hasConflict = await ShowTimeRepository.hasHallTimeConflict(
+  const hasConflict = await showtimeRepository.hasHallTimeConflict(
     payload.hall_id,
     payload.start_time,
     payload.end_time,
@@ -111,41 +102,37 @@ async function ensureNoConflict(payload, ignoredShowTimeId = null) {
   }
 }
 
-// Validation, relation, conflict шалгалтуудыг давсны дараа шинэ showtime үүсгэнэ.
 async function createShowTime(payload) {
   validatePayload(payload);
   await ensureRelations(payload);
   await ensureNoConflict(payload);
 
-  return normalizeShowTime(await ShowTimeRepository.create(payload));
+  return normalizeShowTime(await showtimeRepository.create(payload));
 }
 
-// Байгаа showtime-г шалгаад шинэ мэдээллээр update хийнэ.
 async function updateShowTime(id, payload) {
   validatePayload(payload);
 
-  const existing = await ShowTimeRepository.findById(id);
+  const existing = await showtimeRepository.findById(id);
   if (!existing) throw createError("Show time not found", 404);
 
   await ensureRelations(payload);
   await ensureNoConflict(payload, id);
 
-  return normalizeShowTime(await ShowTimeRepository.update(id, payload));
+  return normalizeShowTime(await showtimeRepository.update(id, payload));
 }
 
-// Мөрийг бүр устгахгүй, deleted_at бөглөж soft delete хийнэ.
 async function deleteShowTime(id) {
-  const deleted = await ShowTimeRepository.softDelete(id);
+  const deleted = await showtimeRepository.softDelete(id);
   if (!deleted) throw createError("Show time not found", 404);
 
   return { id: Number(id) };
 }
 
-// Frontend form дээр ашиглах active movies болон halls жагсаалтыг зэрэг авна.
 async function getFormOptions() {
   const [movies, halls] = await Promise.all([
-    MovieRepository.findActiveMovies(),
-    CinemaHallRepository.findActiveHalls(),
+    movieRepository.findActiveMovies(),
+    hallsRepository.findActiveHalls(),
   ]);
 
   return { movies, halls };

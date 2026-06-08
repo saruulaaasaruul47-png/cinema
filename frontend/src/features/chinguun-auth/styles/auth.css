@@ -1,4 +1,6 @@
 /* ── Auth design tokens ───────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
 :root {
   --auth-bg: #06060c;
   --auth-surface: #0e0e1a;
@@ -19,8 +21,6 @@
   --auth-font: 'DM Serif Display', Georgia, serif;
   --auth-body: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
 }
-
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
 /* ── Page shell ──────────────────────────────────────── */
 .auth-page {

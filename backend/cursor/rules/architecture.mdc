@@ -1,0 +1,95 @@
+---
+description: Express MVC төслийн архитектур, бүтэц, дүрмүүд — Functional хэлбэр (JavaScript)
+globs: ["backend/**/*.js"]
+alwaysApply: true
+---
+
+# Express MVC Төслийн Архитектур (Functional Style)
+
+## Фолдерын бүтэц
+
+```
+backend/
+├── app.js                ← Express апп тохируулга, route холболт
+├── routes/               ← URL → controller mapping (router файлууд)
+├── controllers/          ← HTTP request/response зохицуулагч (функцууд)
+├── services/             ← Бизнесийн логик (функцууд)
+├── repositories/         ← Өгөгдлийн сангийн хандалт (функцууд)
+├── models/               ← Mapper функц + DTO (class биш)
+├── middleware/           ← Express middleware функцүүд
+├── config/               ← DB холболт (db.js), migration
+└── utils/                ← pagination, apiResponse гэх мэт нийтлэг туслах
+```
+
+### Файлын нэршил
+
+| Давхарга     | Загвар                    | Жишээ                      |
+|-------------|---------------------------|----------------------------|
+| Route       | `router.<feature>.js`     | `router.user.js`           |
+| Controller  | `<feature>.controller.js` | `user.controller.js`       |
+| Service     | `<feature>.service.js`    | `user.service.js`          |
+| Repository  | `<feature>.repository.js` | `user.repository.js`       |
+| Model       | `<feature>Model.js`       | `userModel.js`             |
+| Middleware  | `<name>.middleware.js`    | `auth.middleware.js`       |
+
+> **Анхаар:** `repository/` (singular), `MovieRepository.js` (PascalCase) зэрэг хуучин бүтэц ашиглахгүй — бүх код `repositories/` дотор functional `.repository.js` файл байна.
+
+---
+
+## Давхаргын үүрэг хариуцлага
+
+### Routes (`routes/`)
+- URL path-ийг controller функцтэй холбоно
+- Auth middleware (`protect`, `authorize`) энд бүртгэнэ
+- Бизнесийн логик, DB хандалт **огт агуулахгүй**
+
+### Controller (`controllers/`)
+- Зөвхөн HTTP хүсэлт хүлээн авч, хариу буцаана
+- Service функцийг дуудаж, үр дүнг response-д буцаана
+- `express-async-handler` эсвэл `asyncHandler` wrapper ашиглана
+
+### Service (`services/`)
+- Бүх бизнесийн логик энд байна
+- Repository функцуудыг дуудаж өгөгдөлтэй ажиллана
+- HTTP-ийн тухай ямар ч зүйл мэдэхгүй (`req`, `res` байхгүй)
+- Алдаа гарвал `throw` хийж errorHandler-т дамжуулна
+
+### Repository (`repositories/`)
+- Зөвхөн өгөгдлийн сангийн CRUD үйлдлүүд
+- **mysql2** `pool.execute()` / `pool.query()` ашиглана
+- Raw DB өгөгдлийг буцаана — DTO хувиргалт хийхгүй
+- DB холболт: `config/db.js`
+
+### Model (`models/`)
+- `toXxxDTO()` mapper функц — sensitive талбар хасна
+- Class ашиглахгүй
+- DB query **огт агуулахгүй**
+
+### Middleware (`middleware/`)
+- Auth, error handler зэрэг cross-cutting concerns
+- `errorHandler` нь **4 параметртэй** `(err, req, res, next)`
+
+---
+
+## Давхаргын хоорондын харилцаа
+
+```
+Request
+  └→ app.js → Routes → Controller → Service → Repository → config/db.js → MySQL
+
+Error
+  └→ throw Error (statusCode) → asyncHandler → errorHandler → Response
+```
+
+---
+
+## Код засах шалгалтын жагсаалт
+
+1. **Route** дотор бизнесийн логик эсвэл DB query байвал → Controller/Service руу зөөнө
+2. **Controller** дотор raw SQL байвал → Repository руу зөөнө
+3. **Service** дотор `req`, `res` байвал → засна
+4. **Service** import `../repository/` байвал → `../repositories/` болгоно
+5. **Repository** дотор `throw` эсвэл `toXxxDTO()` байвал → Service руу зөөнө
+6. **Model** дотор DB query байвал → Repository руу зөөнө
+7. **Model** нь `class` байвал → mapper функц болгоно
+8. PascalCase repository (`MovieRepository.js`) байвал → `*.repository.js` болгоно
