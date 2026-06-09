@@ -21,6 +21,7 @@ import Settings from './admin/pages/Settings/Settings'
 import SeatSelection from './client/pages/SeatSelection'
 import BookingHistory from './client/pages/BookingHistory'
 import Dashboard from './admin/pages/Dashboard/Dashboard'
+import MovieDetailPage from './client/pages/MovieDetailPage'
 const router = createBrowserRouter([
   {
     path: '/',
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
       { path: 'seatselection', element: <SeatSelection /> },
       { path: 'booking/:showtimeId', element: <SeatSelection /> },
       { path: 'booking-history', element: <BookingHistory /> },
+      { path: 'movie/:id', element: <MovieDetailPage /> },
       {
         path: 'profile',
         element: (
