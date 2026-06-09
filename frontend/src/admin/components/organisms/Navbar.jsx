@@ -1,5 +1,6 @@
 import { useLocation } from 'react-router-dom'
 import { Bell, Search, Menu } from 'lucide-react'
+import { useAuth } from '../../../features/chinguun-auth/context/AuthContext'
 
 const pageNames = {
   '/': 'Dashboard',
@@ -15,6 +16,7 @@ const pageNames = {
 
 const Navbar = () => {
   const location = useLocation()
+  const { user } = useAuth()
   const title = pageNames[location.pathname] ?? 'Cinema Admin'
 
   return (
@@ -42,9 +44,9 @@ const Navbar = () => {
 
         {/* Avatar */}
         <div className="flex items-center gap-2 pl-2 border-l border-[#2a2a2a]">
-          <div className="w-7 h-7 rounded-full bg-[#e50914] flex items-center justify-center text-xs font-bold text-white">A</div>
+          <div className="w-7 h-7 rounded-full bg-[#e50914] flex items-center justify-center text-xs font-bold text-white">{user?.username?.[0]?.toUpperCase()}</div>
           <div className="hidden sm:block">
-            <div className="text-xs font-semibold text-white leading-none">Admin</div>
+            <div className="text-xs font-semibold text-white leading-none">{user?.username}</div>
             <div className="text-[10px] text-[#888888]">Super Admin</div>
           </div>
         </div>

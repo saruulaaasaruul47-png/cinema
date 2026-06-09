@@ -12,6 +12,7 @@ const addMovie = asyncHandler(async (req, res, next) => {
     return res.json({
         status: 200,
         message: "Movie added successfully",
+        movie
     })
 })
 

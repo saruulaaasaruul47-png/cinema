@@ -1,9 +1,9 @@
 const pool = require("../config/db");
 
-const createMovie = async (title, description, duration, release_date, director) => {
+const createMovie = async (title, description, duration, poster_url, release_date, director) => {
   const [result] = await pool.execute(
-    "INSERT INTO movies (title, description, duration, release_date, director) VALUES (?, ?, ?, ?, ?)",
-    [title, description, duration, release_date, director]
+    "INSERT INTO movies (title, description, duration, poster_url, release_date, director) VALUES (?, ?, ?, ?, ?, ?)",
+    [title, description, duration, poster_url, release_date, director]
   );
   return result;
 };
@@ -50,10 +50,10 @@ const findById = async (id) => {
   return rows[0] || null;
 };
 
-const updateMovie = async (id, title, description, duration, release_date, director) => {
+const updateMovie = async (id, title, description, duration, poster_url, release_date, director) => {
   const [result] = await pool.execute(
-    "UPDATE movies SET title = ?, description = ?, duration = ?, release_date = ?, director = ? WHERE id = ?",
-    [title, description, duration, release_date, director, id]
+    "UPDATE movies SET title = ?, description = ?, duration = ?, poster_url = ?, release_date = ?, director = ? WHERE id = ?",
+    [title, description, duration, poster_url, release_date, director, id]
   );
   return result;
 };

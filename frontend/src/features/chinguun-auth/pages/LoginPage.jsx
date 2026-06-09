@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const regexEmail = /@/
 
   const handleChange = (e) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }))
@@ -24,6 +25,11 @@ export default function LoginPage() {
       setError('И-мэйл болон нууц үгээ оруулна уу')
       return
     }
+    // if (!regexEmail.test(form.email)) {
+    //   setError('И-мэйл хаяг байна')
+    //   console.log("@ байхгүй байна")
+    //   return
+    // }
     setLoading(true)
     try {
       await login(form.email, form.password)

@@ -3,6 +3,7 @@ import {
   LayoutDashboard, Film, Tag, Building2, Grid3X3,
   Clock, Users, Settings, Clapperboard
 } from 'lucide-react'
+import { useAuth } from '../../../features/chinguun-auth/context/AuthContext'
 
 const navItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -16,6 +17,8 @@ const navItems = [
 ]
 
 const Sidebar = () => {
+  const { user } = useAuth()
+
   return (
     <aside className="w-56 min-h-screen bg-[#111111] border-r border-[#2a2a2a] flex flex-col shrink-0">
       {/* Logo */}
@@ -51,10 +54,10 @@ const Sidebar = () => {
       {/* Footer */}
       <div className="px-4 py-4 border-t border-[#2a2a2a]">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-[#e50914] flex items-center justify-center text-xs font-bold text-white">A</div>
+          <div className="w-7 h-7 rounded-full bg-[#e50914] flex items-center justify-center text-xs font-bold text-white">{user?.username?.[0]?.toUpperCase()}</div>
           <div>
-            <div className="text-xs font-semibold text-white">Admin</div>
-            <div className="text-[10px] text-[#888888]">Super Admin</div>
+            <div className="text-xs font-semibold text-white">{user?.username}</div>
+            <div className="text-[10px] text-[#888888]">{user?.role}</div>
           </div>
         </div>
       </div>

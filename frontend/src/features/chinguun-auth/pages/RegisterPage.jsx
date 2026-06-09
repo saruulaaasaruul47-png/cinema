@@ -10,7 +10,8 @@ export default function RegisterPage() {
   const [form, setForm] = useState({ username: '', email: '', password: '', confirm: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-
+  const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/
   const handleChange = (e) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }))
     setError('')
@@ -20,8 +21,13 @@ export default function RegisterPage() {
     if (!form.username.trim()) return 'Хэрэглэгчийн нэрийг оруулна уу'
     if (form.username.length < 3) return 'Хэрэглэгчийн нэр 3-аас дээш тэмдэгт байх ёстой'
     if (!form.email) return 'И-мэйл оруулна уу'
+    if (!regexEmail.test(form.email)) {
+      return 'И-мэйл хаяг буруу байна'
+    }
     if (!form.password) return 'Нууц үг оруулна уу'
-    if (form.password.length < 6) return 'Нууц үг 6-аас дээш тэмдэгт байх ёстой'
+    if (!regexPassword.test(form.password)) {
+      return 'Нууц үг 8-аас дээш тэмдэгт, нэг том үсэг болон нэг тоо агуулсан байх ёстой'
+    }
     if (form.password !== form.confirm) return 'Нууц үг таарахгүй байна'
     return null
   }
@@ -34,7 +40,7 @@ export default function RegisterPage() {
     setLoading(true)
     try {
       await register(form.username, form.email, form.password)
-      // Бүртгэлийн дараа шууд login хийх
+      
       await login(form.email, form.password)
       navigate('/', { replace: true })
     } catch (err) {

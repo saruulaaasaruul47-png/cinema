@@ -1,54 +1,101 @@
-const {
-  createMovie,
-  findMovie,
-  getAllMovies,
-  getMovieById,
-  updateMovie,
-  deleteMovie,
+const { 
+    createMovie, 
+    findMovie, 
+    getAllMovies, 
+    getMovieById, 
+    updateMovie, 
+    deleteMovie 
 } = require("../repositories/movie.repository");
 
-function createError(message, statusCode) {
-  const err = new Error(message);
-  err.statusCode = statusCode;
-  return err;
-}
 
-const newMovie = async (data) => {
-  const { title, description, duration, release_date, director } = data;
-  const existing = await findMovie(title, director);
-  if (existing) throw createError("Movie already exist", 409);
+const Movie = require("../models/movieModels");
+const asyncHandler = require("express-async-handler");
 
-  return createMovie(title, description, duration, release_date, director);
+const toNullable = (value) => value === undefined || value === "" ? null : value;
+
+const buildMovie = (data) => {
+    const releaseDate = data.release_date || data.releaseDate || (data.year ? `${data.year}-01-01` : null);
+
+    return new Movie(
+        data.title,
+        toNullable(data.description),
+        toNullable(data.duration),
+        toNullable(data.poster_url || data.posterUrl || data.poster),
+        toNullable(releaseDate),
+        data.director
+    );
 };
 
-const getMovies = async () => getAllMovies();
+const newMovie = asyncHandler(async (data) => {
+    const movie = buildMovie(data);
+    if (!movie.title || !movie.director) {
+        const error = new Error("Title and director are required");
+        error.statusCode = 400;
+        throw error;
+    }
+    const check = await findMovie(movie.title, movie.director);
+    if(check){
+        const error = new Error("Movie already exist");
+        error.statusCode = 409;
+        throw error;
+    }
+    const addMovie = await createMovie(
+        movie.title,
+        movie.description,
+        movie.duration,
+        movie.poster_url,
+        movie.release_date,
+        movie.director
+    )
+    return addMovie;
 
-const getMovieByIdService = async (id) => {
-  const movie = await getMovieById(id);
-  if (!movie) throw createError("Movie not found", 404);
-  return movie;
-};
+})
 
-const updateMovieService = async (id, data) => {
-  const movie = await getMovieById(id);
-  if (!movie) throw createError("Movie not found", 404);
+const getMovies = asyncHandler(async () => {
+    const movies = await getAllMovies();
+    return movies;
+})
 
-  return updateMovie(
-    id,
-    data.title,
-    data.description,
-    data.duration,
-    data.release_date,
-    data.director
-  );
-};
+const getMovieByIdService = asyncHandler(
+    async (id) => {
+        const movie = await getMovieById(id);
+        return movie;
+    }
+)
 
-const deleteMovieService = async (id) => deleteMovie(id);
+const updateMovieService = asyncHandler(
+    async (id, data) => {
+        const movie = await getMovieById(id);
+        if (!movie) {
+            const error = new Error("Movie not found");
+            error.statusCode = 404;
+            throw error;
+        }
+        const nextMovie = buildMovie({ ...movie, ...data });
+        const update = await updateMovie(
+            id,
+            nextMovie.title,
+            nextMovie.description,
+            nextMovie.duration,
+            nextMovie.poster_url,
+            nextMovie.release_date,
+            nextMovie.director
+        );
+        return update;
+    }
+)
 
-module.exports = {
-  newMovie,
-  getMovies,
-  getMovieByIdService,
-  updateMovieService,
-  deleteMovieService,
+const deleteMovieService = asyncHandler(
+    async (id) => {
+        const deleteMovieById = await deleteMovie(id);
+        return deleteMovieById;
+    }
+)
+
+module.exports = { 
+    newMovie, 
+    getMovies, 
+    getMovieByIdService, 
+    updateMovieService, 
+    deleteMovieService 
 };

@@ -1,4 +1,4 @@
-const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1'
+const API = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1'
 
 const request = async (endpoint, options = {}) => {
   const res = await fetch(`${API}${endpoint}`, {
@@ -6,8 +6,9 @@ const request = async (endpoint, options = {}) => {
     credentials: 'include',
     ...options,
   })
-  const data = await res.json()
-  if (!res.ok) throw new Error(data.error || 'Алдаа гарлаа')
+
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data.message || data.error || 'Алдаа гарлаа')
   return data
 }
 

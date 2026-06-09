@@ -30,10 +30,12 @@ const Showtimes = () => {
 
   const handleSave = () => {
     if (!form.movieId || !form.hallId || !form.date || !form.time) return
-    const movie = movies.find(m => String(m.id) === String(form.movieId))
-    const hall = halls.find(h => String(h.id) === String(form.hallId))
+    const movie = movies.find(m => m.id === Number(form.movieId))
+    const hall = halls.find(h => h.id === Number(form.hallId))
     const payload = {
       ...form,
+      movieId: Number(form.movieId),
+      hallId: Number(form.hallId),
       movieTitle: movie?.title ?? '',
       hallName: hall?.name ?? '',
       price: Number(form.price),

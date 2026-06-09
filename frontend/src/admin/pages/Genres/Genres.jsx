@@ -12,7 +12,7 @@ const EMPTY = { name: '', description: '' }
 const PER_PAGE = 6
 
 const Genres = () => {
-  const { genres, addGenre, updateGenre, deleteGenre } = useApp()
+  const { genres, movies, addGenre, updateGenre, deleteGenre } = useApp()
   const [modalMode, setModalMode] = useState(null)
   const [selected, setSelected] = useState(null)
   const [confirmId, setConfirmId] = useState(null)
@@ -62,7 +62,7 @@ const Genres = () => {
                 </td>
                 <td className="border-t border-[#2a2a2a]/50 px-4 py-3 text-sm text-white text-[#888888]">{g.description}</td>
                 <td className="border-t border-[#2a2a2a]/50 px-4 py-3 text-sm text-white">
-                  <span className="font-['JetBrains_Mono'] text-[#e50914] text-sm">{g.movieCount}</span>
+                  <span className="font-['JetBrains_Mono'] text-[#e50914] text-sm">{movies.filter(m => m.genres.includes(g.name)).length}</span>
                 </td>
                 <td className="border-t border-[#2a2a2a]/50 px-4 py-3 text-sm text-white">
                   <div className="flex items-center gap-1">
