@@ -11,7 +11,6 @@ import LoginPage from './features/chinguun-auth/pages/LoginPage'
 import RegisterPage from './features/chinguun-auth/pages/RegisterPage'
 import ProfilePage from './features/chinguun-auth/pages/ProfilePage'
 import ShowTimePage from './client/pages/ShowTimePage'
-import Dashboard from './admin/pages/Dashboard/Dashboard'
 import Movies from './admin/pages/Movies/Movies'
 import Genres from './admin/pages/Genres/Genres'
 import Halls from './admin/pages/Halls/Halls'
@@ -20,6 +19,8 @@ import Showtimes from './admin/pages/Showtimes/Showtimes'
 import Employees from './admin/pages/Employees/Employees'
 import Settings from './admin/pages/Settings/Settings'
 import SeatSelection from './client/pages/SeatSelection'
+import BookingHistory from './client/pages/BookingHistory'
+import SaihanaaDashboard from './features/saihanaa-dashboard/DashboardPage'
 const router = createBrowserRouter([
   {
     path: '/',
@@ -28,7 +29,9 @@ const router = createBrowserRouter([
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
       { path: 'showtimes', element: <ShowTimePage /> },
-      {path: 'seatselection', element: <SeatSelection />},
+      { path: 'seatselection', element: <SeatSelection /> },
+      { path: 'booking/:showtimeId', element: <SeatSelection /> },
+      { path: 'booking-history', element: <BookingHistory /> },
       {
         path: 'profile',
         element: (
@@ -48,7 +51,7 @@ const router = createBrowserRouter([
         ),
         children: [
           { index: true, element: <Navigate to="/admin" replace /> },
-          { path: 'admin', element: <Dashboard /> },
+          { path: 'admin', element: <SaihanaaDashboard /> },
           { path: 'admin/movies', element: <Movies /> },
           { path: 'admin/genres', element: <Genres /> },
           { path: 'admin/halls', element: <Halls /> },

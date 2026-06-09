@@ -1,4 +1,5 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1'
+export const API_BASE_URL =
+  import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:5050/api/v1'
 
 export const emptyAnalytics = {
   summary: {
@@ -26,5 +27,5 @@ export async function fetchDashboardAnalytics(signal) {
   }
 
   const data = await response.json()
-  return data.analytics || emptyAnalytics
+  return data.data || data.analytics || emptyAnalytics
 }

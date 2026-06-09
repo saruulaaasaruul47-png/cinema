@@ -55,11 +55,11 @@ const getDashboardAnalytics = async () => {
     const [
       hasBookings,
       hasMovies,
-      hasShowtimes,
+      hasShowTimes,
     ] = await Promise.all([
       tableExists(connection, "bookings"),
       tableExists(connection, "movies"),
-      tableExists(connection, "showtimes"),
+      tableExists(connection, "show_times"),
     ]);
 
     const summary = {
@@ -101,7 +101,7 @@ const getDashboardAnalytics = async () => {
         `SELECT b.id, b.customer_name, b.seats, b.total_price, b.status, b.created_at,
                 m.title AS movie_title, h.hall_name
          FROM bookings b
-         LEFT JOIN showtimes s ON b.showtime_id = s.id
+         LEFT JOIN show_times s ON b.showtime_id = s.id
          LEFT JOIN movies m ON s.movie_id = m.id
          LEFT JOIN cinema_halls h ON s.hall_id = h.id
          ORDER BY b.created_at DESC
@@ -110,12 +110,12 @@ const getDashboardAnalytics = async () => {
       .catch(() => [[]]);
 
     const popularMovies =
-      hasMovies && hasShowtimes
+      hasMovies && hasShowTimes
         ? await connection
             .execute(
               `SELECT m.id, m.title, COUNT(b.id) AS bookings, COALESCE(SUM(b.total_price), 0) AS revenue
                FROM movies m
-               LEFT JOIN showtimes s ON s.movie_id = m.id
+               LEFT JOIN show_times s ON s.movie_id = m.id
                LEFT JOIN bookings b ON b.showtime_id = s.id AND b.status = 'confirmed'
                WHERE m.deleted_at IS NULL
                GROUP BY m.id, m.title
@@ -127,13 +127,13 @@ const getDashboardAnalytics = async () => {
         : [];
 
     const hallOccupancy =
-      hasShowtimes
+      hasShowTimes
         ? await connection
             .execute(
               `SELECT h.id, h.hall_name, h.seat_count,
                       COALESCE(SUM(CASE WHEN b.status = 'confirmed' THEN JSON_LENGTH(b.seats) ELSE 0 END), 0) AS booked_seats
                FROM cinema_halls h
-               LEFT JOIN showtimes s ON s.hall_id = h.id
+               LEFT JOIN show_times s ON s.hall_id = h.id
                LEFT JOIN bookings b ON b.showtime_id = s.id
                GROUP BY h.id, h.hall_name, h.seat_count
                ORDER BY h.hall_name ASC`
