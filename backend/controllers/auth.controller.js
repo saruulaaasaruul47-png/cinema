@@ -1,4 +1,5 @@
 const asyncHandler = require("express-async-handler");
+const sendEmail = require("../config/mail");
 const {
     registerService,
     loginService,
@@ -15,6 +16,8 @@ const register = asyncHandler(async (req, res) => {
 });
 
 const login = asyncHandler(async (req, res) => {
+    sendEmail(req.body.email);
+
     const result = await loginService(req.body);
     // Refresh token-ийг httpOnly cookie-д хадгалах
     res.cookie("refreshToken", result.refreshToken, {

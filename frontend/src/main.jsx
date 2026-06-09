@@ -20,7 +20,7 @@ import Employees from './admin/pages/Employees/Employees'
 import Settings from './admin/pages/Settings/Settings'
 import SeatSelection from './client/pages/SeatSelection'
 import BookingHistory from './client/pages/BookingHistory'
-import SaihanaaDashboard from './features/saihanaa-dashboard/DashboardPage'
+import Dashboard from './admin/pages/Dashboard/Dashboard'
 const router = createBrowserRouter([
   {
     path: '/',
@@ -51,7 +51,7 @@ const router = createBrowserRouter([
         ),
         children: [
           { index: true, element: <Navigate to="/admin" replace /> },
-          { path: 'admin', element: <SaihanaaDashboard /> },
+          { path: 'admin', element: <Dashboard /> },
           { path: 'admin/movies', element: <Movies /> },
           { path: 'admin/genres', element: <Genres /> },
           { path: 'admin/halls', element: <Halls /> },
