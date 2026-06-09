@@ -9,20 +9,24 @@ export function ProtectedRoute({ children, allowedRoles }) {
     return (
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        minHeight: '100vh', background: '#0a0a0f',
+        minHeight: '100vh', background: '#0a0a0a',
       }}>
-        <div className="auth-spinner" />
+        <div style={{
+          width: '32px', height: '32px', border: '3px solid #333',
+          borderTopColor: '#e50914', borderRadius: '50%',
+          animation: 'spin 0.75s linear infinite',
+        }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     )
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />
+    return <Navigate to="/admin/login" state={{ from: location }} replace />
   }
 
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
     return <Navigate to="/" replace />
   }
-
   return children
 }

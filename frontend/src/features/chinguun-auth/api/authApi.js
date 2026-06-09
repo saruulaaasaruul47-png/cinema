@@ -1,4 +1,4 @@
-const API = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:5050/api/v1'
+const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1'
 
 const request = async (endpoint, options = {}) => {
   const res = await fetch(`${API}${endpoint}`, {
@@ -6,18 +6,19 @@ const request = async (endpoint, options = {}) => {
     credentials: 'include',
     ...options,
   })
-
-  const data = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(data.message || data.error || 'Алдаа гарлаа')
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || data.message || 'Алдаа гарлаа')
   return data
 }
 
 export const authApi = {
-  register: (body) =>
-    request('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
-
+  // Нийтийн login
   login: (body) =>
     request('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
+
+  // Admin/Staff тусдаа login
+  adminLogin: (body) =>
+    request('/auth/admin-login', { method: 'POST', body: JSON.stringify(body) }),
 
   logout: () =>
     request('/auth/logout', { method: 'POST' }),
@@ -26,9 +27,7 @@ export const authApi = {
     request('/auth/refresh', { method: 'POST' }),
 
   getProfile: (token) =>
-    request('/users/profile', {
-      headers: { Authorization: `Bearer ${token}` },
-    }),
+    request('/users/profile', { headers: { Authorization: `Bearer ${token}` } }),
 
   updateProfile: (token, body) =>
     request('/users/profile', {

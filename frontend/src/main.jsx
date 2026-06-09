@@ -25,15 +25,25 @@ import MovieDetailPage from './client/pages/MovieDetailPage'
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />,
+    element: <App />,  // AuthProvider энд байх ёстой
     children: [
+      // ✅ Public routes
+      { index: true, element: <ShowTimePage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
-      { path: 'showtimes', element: <ShowTimePage /> },
-      { path: 'seatselection', element: <SeatSelection /> },
-      { path: 'booking/:showtimeId', element: <SeatSelection /> },
-      { path: 'booking-history', element: <BookingHistory /> },
       { path: 'movie/:id', element: <MovieDetailPage /> },
+      { path: 'booking/:showtimeId', element: <SeatSelection /> },
+      { path: 'seatselection', element: <SeatSelection /> },
+
+      // ✅ Protected client routes
+      {
+        path: 'booking-history',
+        element: (
+          <ProtectedRoute>
+            <BookingHistory />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: 'profile',
         element: (
@@ -42,8 +52,10 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+
+      // ✅ Protected admin routes
       {
-        path: '/',
+        path: 'admin',
         element: (
           <ProtectedRoute>
             <AppProvider>
@@ -52,18 +64,16 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
         children: [
-          { index: true, element: <Navigate to="/admin" replace /> },
-          { path: 'admin', element: <Dashboard /> },
-          { path: 'admin/movies', element: <Movies /> },
-          { path: 'admin/genres', element: <Genres /> },
-          { path: 'admin/halls', element: <Halls /> },
-          { path: 'admin/hall-seats', element: <HallSeats /> },
-          { path: 'admin/showtimes', element: <Showtimes /> },
-          { path: 'admin/employees', element: <Employees /> },
-          { path: 'admin/settings', element: <Settings /> },
+          { index: true, element: <Dashboard /> },
+          { path: 'movies', element: <Movies /> },
+          { path: 'genres', element: <Genres /> },
+          { path: 'halls', element: <Halls /> },
+          { path: 'hall-seats', element: <HallSeats /> },
+          { path: 'showtimes', element: <Showtimes /> },
+          { path: 'employees', element: <Employees /> },
+          { path: 'settings', element: <Settings /> },
         ],
       },
-      { path: '*', element: <Navigate to="/admin" replace /> },
     ],
   },
 ])

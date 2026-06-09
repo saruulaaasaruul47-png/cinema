@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import '../styles/auth.css'
 
+const ROLE_LABELS = { admin: '👑 Admin', staff: '🎭 Staff', user: '🎟 Member' }
+
 export default function ProfilePage() {
   const { user, logout, updateProfile, changePassword } = useAuth()
   const navigate = useNavigate()
@@ -43,7 +45,7 @@ export default function ProfilePage() {
       return
     }
     if (pwForm.newPassword.length < 6) {
-      setPwMsg({ type: 'error', text: 'Шинэ нууц үг 6-аас дээш тэмдэгт байх ёстой' })
+      setPwMsg({ type: 'error', text: 'Шинэ нууц үг 6+ тэмдэгт байх ёстой' })
       return
     }
     if (pwForm.newPassword !== pwForm.confirm) {
@@ -62,44 +64,45 @@ export default function ProfilePage() {
     }
   }
 
-  const roleBadge = { admin: '👑 Admin', staff: '🎭 Staff', user: '🎟 User' }
-
   return (
     <div className="profile-page">
-      <div className="auth-bg">
-        <div className="auth-bg-reel" />
-        <div className="auth-bg-reel reel-2" />
-        <div className="auth-film-strip" />
+      {/* Top bar */}
+      <div className="profile-hero-bar">
+        <div className="profile-brand">
+          <div className="profile-brand-dot" />
+          CinemaBook
+        </div>
+        <button className="profile-logout" onClick={handleLogout}>Гарах</button>
       </div>
 
       <div className="profile-container">
-        {/* Header */}
-        <div className="profile-header">
+        {/* User header */}
+        <div className="profile-card-header">
           <div className="profile-avatar">
             {user?.username?.[0]?.toUpperCase() || '?'}
           </div>
-          <div className="profile-info">
+          <div className="profile-meta">
             <h1>{user?.username}</h1>
             <p>{user?.email}</p>
-            <span className="profile-role-badge">
-              {roleBadge[user?.role] || user?.role}
+            <span className="profile-badge">
+              {ROLE_LABELS[user?.role] || user?.role}
             </span>
           </div>
-          <button className="profile-logout-btn" onClick={handleLogout}>
-            Гарах
-          </button>
         </div>
 
+        {/* Grid */}
         <div className="profile-grid">
-          {/* Profile засах */}
-          <div className="profile-card">
-            <h2 className="profile-card-title">Профайл засах</h2>
+          {/* Edit profile */}
+          <div className="profile-section">
+            <div className="profile-section-title">Профайл засах</div>
+            <div className="profile-section-sub">Нэр болон зургаа шинэчлэх</div>
+
             {profileMsg.text && (
-              <div className={`auth-${profileMsg.type === 'error' ? 'error' : 'success'}`}>
+              <div className={profileMsg.type === 'error' ? 'auth-error' : 'auth-success'} style={{ marginBottom: 16 }}>
                 {profileMsg.text}
               </div>
             )}
-            <form onSubmit={handleProfileSubmit} className="auth-form">
+            <form className="auth-form" onSubmit={handleProfileSubmit}>
               <div className="auth-field">
                 <label>Хэрэглэгчийн нэр</label>
                 <input
@@ -119,22 +122,24 @@ export default function ProfilePage() {
             </form>
           </div>
 
-          {/* Нууц үг солих */}
-          <div className="profile-card">
-            <h2 className="profile-card-title">Нууц үг солих</h2>
+          {/* Change password */}
+          <div className="profile-section">
+            <div className="profile-section-title">Нууц үг солих</div>
+            <div className="profile-section-sub">Аюулгүй байдлаа хамгаал</div>
+
             {pwMsg.text && (
-              <div className={`auth-${pwMsg.type === 'error' ? 'error' : 'success'}`}>
+              <div className={pwMsg.type === 'error' ? 'auth-error' : 'auth-success'} style={{ marginBottom: 16 }}>
                 {pwMsg.text}
               </div>
             )}
-            <form onSubmit={handlePwSubmit} className="auth-form">
+            <form className="auth-form" onSubmit={handlePwSubmit}>
               <div className="auth-field">
                 <label>Одоогийн нууц үг</label>
                 <input
                   type="password"
                   placeholder="••••••••"
                   value={pwForm.currentPassword}
-                  onChange={(e) => setPwForm((p) => ({ ...p, currentPassword: e.target.value }))}
+                  onChange={(e) => setPwForm(p => ({ ...p, currentPassword: e.target.value }))}
                   disabled={pwLoading}
                 />
               </div>
@@ -144,7 +149,7 @@ export default function ProfilePage() {
                   type="password"
                   placeholder="••••••••"
                   value={pwForm.newPassword}
-                  onChange={(e) => setPwForm((p) => ({ ...p, newPassword: e.target.value }))}
+                  onChange={(e) => setPwForm(p => ({ ...p, newPassword: e.target.value }))}
                   disabled={pwLoading}
                 />
               </div>
@@ -154,12 +159,12 @@ export default function ProfilePage() {
                   type="password"
                   placeholder="••••••••"
                   value={pwForm.confirm}
-                  onChange={(e) => setPwForm((p) => ({ ...p, confirm: e.target.value }))}
+                  onChange={(e) => setPwForm(p => ({ ...p, confirm: e.target.value }))}
                   disabled={pwLoading}
                 />
               </div>
               <button className="auth-btn" type="submit" disabled={pwLoading}>
-                {pwLoading ? <span className="auth-spinner-sm" /> : 'Солих'}
+                {pwLoading ? <span className="auth-spinner-sm" /> : 'Солих →'}
               </button>
             </form>
           </div>
