@@ -4,28 +4,25 @@ import { authApi } from '../api/authApi'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user, setUser]   = useState(null)
+  const [user, setUser] = useState(null)
   const [token, setToken] = useState(() => sessionStorage.getItem('accessToken'))
   const [loading, setLoading] = useState(true)
   const refreshTimer = useRef(null)
 
-  // Access token-г 13 минут тутамд шинэчлэх
   const scheduleRefresh = useCallback((delay = 13 * 60 * 1000) => {
     clearTimeout(refreshTimer.current)
     refreshTimer.current = setTimeout(async () => {
       try {
         const data = await authApi.refresh()
-        const newToken = data.accessToken
-        setToken(newToken)
-        sessionStorage.setItem('accessToken', newToken)
+        setToken(data.accessToken)
+        sessionStorage.setItem('accessToken', data.accessToken)
         scheduleRefresh()
       } catch {
-        logout()
+        doLogout()
       }
     }, delay)
   }, [])
 
-  // Profile татах
   const fetchProfile = useCallback(async (accessToken) => {
     try {
       const data = await authApi.getProfile(accessToken)
@@ -35,15 +32,21 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  // App ачаалахад refresh хийж token шалгах
+  const doLogout = useCallback(async () => {
+    try { await authApi.logout() } catch {}
+    setUser(null)
+    setToken(null)
+    sessionStorage.removeItem('accessToken')
+    clearTimeout(refreshTimer.current)
+  }, [])
+
   useEffect(() => {
     const init = async () => {
       try {
         const data = await authApi.refresh()
-        const newToken = data.accessToken
-        setToken(newToken)
-        sessionStorage.setItem('accessToken', newToken)
-        await fetchProfile(newToken)
+        setToken(data.accessToken)
+        sessionStorage.setItem('accessToken', data.accessToken)
+        await fetchProfile(data.accessToken)
         scheduleRefresh()
       } catch {
         setToken(null)
@@ -58,25 +61,23 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password) => {
     const data = await authApi.login({ email, password })
-    const newToken = data.accessToken
-    setToken(newToken)
-    sessionStorage.setItem('accessToken', newToken)
+    setToken(data.accessToken)
+    sessionStorage.setItem('accessToken', data.accessToken)
     setUser(data.user)
     scheduleRefresh()
     return data
   }, [scheduleRefresh])
 
   const register = useCallback(async (username, email, password) => {
-    return await authApi.register({ username, email, password })
+    return authApi.register({ username, email, password })
   }, [])
 
-  const logout = useCallback(async () => {
-    try { await authApi.logout() } catch {}
-    setUser(null)
-    setToken(null)
-    sessionStorage.removeItem('accessToken')
-    clearTimeout(refreshTimer.current)
-  }, [])
+  const setTokenAndUser = useCallback((accessToken, userData) => {
+    setToken(accessToken)
+    sessionStorage.setItem('accessToken', accessToken)
+    setUser(userData)
+    scheduleRefresh()
+  }, [scheduleRefresh])
 
   const updateProfile = useCallback(async (body) => {
     const data = await authApi.updateProfile(token, body)
@@ -85,13 +86,14 @@ export function AuthProvider({ children }) {
   }, [token, fetchProfile])
 
   const changePassword = useCallback(async (currentPassword, newPassword) => {
-    return await authApi.changePassword(token, { currentPassword, newPassword })
+    return authApi.changePassword(token, { currentPassword, newPassword })
   }, [token])
 
   return (
     <AuthContext.Provider value={{
       user, token, loading,
-      login, register, logout, updateProfile, changePassword,
+      login, register, logout: doLogout, setTokenAndUser,
+      updateProfile, changePassword,
       isAuthenticated: !!user,
     }}>
       {children}

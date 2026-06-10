@@ -3,6 +3,7 @@ const sendEmail = require("../config/mail");
 const {
     registerService,
     loginService,
+    adminLoginService,
     logoutService,
     refreshTokenService
 } = require("../services/auth.service");
@@ -15,22 +16,36 @@ const register = asyncHandler(async (req, res) => {
     });
 });
 
+const setAuthCookies = (res, refreshToken) => {
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+};
+
 const login = asyncHandler(async (req, res) => {
     sendEmail(req.body.email);
 
     const result = await loginService(req.body);
-    // Refresh token-ийг httpOnly cookie-д хадгалах
-    res.cookie("refreshToken", result.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 хоног
-    });
+    setAuthCookies(res, result.refreshToken);
     return res.status(200).json({
         success: true,
         message: "Нэвтрэх амжилттай",
         accessToken: result.accessToken,
-        user: result.user
+        user: result.user,
+    });
+});
+
+const adminLogin = asyncHandler(async (req, res) => {
+    const result = await adminLoginService(req.body);
+    setAuthCookies(res, result.refreshToken);
+    return res.status(200).json({
+        success: true,
+        message: "Админ нэвтрэх амжилттай",
+        accessToken: result.accessToken,
+        user: result.user,
     });
 });
 
@@ -53,4 +68,4 @@ const refresh = asyncHandler(async (req, res) => {
     });
 });
 
-module.exports = { register, login, logout, refresh };
+module.exports = { register, login, adminLogin, logout, refresh };

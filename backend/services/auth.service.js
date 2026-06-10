@@ -1,8 +1,6 @@
 require("dotenv").config();
 const bcrypt        = require("bcrypt");
 const jwt           = require("jsonwebtoken");
-const asyncHandler  = require("express-async-handler");
-const User          = require("../models/userModel");
 const {
     findUserByEmail,
     findUserByUsername,
@@ -14,6 +12,12 @@ const {
 } = require("../repositories/user.repository");
 
 const SALT_ROUNDS = 10;
+
+function createError(message, statusCode) {
+    const err = new Error(message);
+    err.statusCode = statusCode;
+    return err;
+}
 
 // Token үүсгэх тусгай функцүүд
 const generateAccessToken = (payload) => {
@@ -28,55 +32,35 @@ const generateRefreshToken = (payload) => {
     });
 };
 
-// Register
-const registerService = asyncHandler(async (data) => {
+const registerService = async (data) => {
     const { username, email, password, role } = data;
 
     const existEmail = await findUserByEmail(email);
-    if (existEmail) {
-        const err = new Error("Энэ и-мэйл бүртгэлтэй байна");
-        err.statusCode = 409;
-        throw err;
-    }
+    if (existEmail) throw createError("Энэ и-мэйл бүртгэлтэй байна", 409);
 
     const existUsername = await findUserByUsername(username);
-    if (existUsername) {
-        const err = new Error("Энэ хэрэглэгчийн нэр аль хэдийн авагдсан");
-        err.statusCode = 409;
-        throw err;
-    }
+    if (existUsername) throw createError("Энэ хэрэглэгчийн нэр аль хэдийн авагдсан", 409);
 
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-    const user = new User(username, email, hashedPassword, role || 'user');
-    await createUser(user.username, user.email, user.password, user.role);
+    await createUser(username, email, hashedPassword, role || "user");
 
     return { message: "Бүртгэл амжилттай" };
-});
+};
 
-// Login
-const loginService = asyncHandler(async (data) => {
+const loginService = async (data) => {
     const { email, password } = data;
 
     const user = await findUserByEmail(email);
-    if (!user) {
-        const err = new Error("И-мэйл эсвэл нууц үг буруу");
-        err.statusCode = 401;
-        throw err;
-    }
+    if (!user) throw createError("И-мэйл эсвэл нууц үг буруу", 401);
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-        const err = new Error("И-мэйл эсвэл нууц үг буруу");
-        err.statusCode = 401;
-        throw err;
-    }
+    if (!isMatch) throw createError("И-мэйл эсвэл нууц үг буруу", 401);
 
     const payload = { id: user.id, email: user.email, role: user.role };
-    const accessToken  = generateAccessToken(payload);
+    const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
 
-    // Refresh token-ийг DB-д хадгалах
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 хоног
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await saveRefreshToken(user.id, refreshToken, expiresAt);
 
     return {
@@ -86,56 +70,49 @@ const loginService = asyncHandler(async (data) => {
             id: user.id,
             username: user.username,
             email: user.email,
-            role: user.role
-        }
+            role: user.role,
+        },
     };
-});
+};
 
-// Logout
-const logoutService = asyncHandler(async (refreshToken) => {
-    if (!refreshToken) {
-        const err = new Error("Refresh token олдсонгүй");
-        err.statusCode = 400;
-        throw err;
+const adminLoginService = async (data) => {
+    const result = await loginService(data);
+    const allowedRoles = ["admin", "staff"];
+
+    if (!allowedRoles.includes(result.user.role)) {
+        throw createError("Энэ үйлдэл хийх эрх байхгүй", 403);
     }
+
+    return result;
+};
+
+const logoutService = async (refreshToken) => {
+    if (!refreshToken) throw createError("Refresh token олдсонгүй", 400);
     await deleteRefreshToken(refreshToken);
     return { message: "Гарах амжилттай" };
-});
+};
 
-// Refresh — шинэ access token авах
-const refreshTokenService = asyncHandler(async (refreshToken) => {
-    if (!refreshToken) {
-        const err = new Error("Refresh token шаардлагатай");
-        err.statusCode = 401;
-        throw err;
-    }
+const refreshTokenService = async (refreshToken) => {
+    if (!refreshToken) throw createError("Refresh token шаардлагатай", 401);
 
     const tokenInDb = await findRefreshToken(refreshToken);
-    if (!tokenInDb) {
-        const err = new Error("Хүчингүй эсвэл хугацаа дууссан token");
-        err.statusCode = 403;
-        throw err;
-    }
+    if (!tokenInDb) throw createError("Хүчингүй эсвэл хугацаа дууссан token", 403);
 
-    let decoded;
     try {
-        decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    } catch (e) {
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+        const payload = { id: decoded.id, email: decoded.email, role: decoded.role };
+        const newAccessToken = generateAccessToken(payload);
+        return { accessToken: newAccessToken };
+    } catch {
         await deleteRefreshToken(refreshToken);
-        const err = new Error("Token буруу байна");
-        err.statusCode = 403;
-        throw err;
+        throw createError("Token буруу байна", 403);
     }
-
-    const payload      = { id: decoded.id, email: decoded.email, role: decoded.role };
-    const newAccessToken = generateAccessToken(payload);
-
-    return { accessToken: newAccessToken };
-});
+};
 
 module.exports = {
     registerService,
     loginService,
+    adminLoginService,
     logoutService,
-    refreshTokenService
+    refreshTokenService,
 };

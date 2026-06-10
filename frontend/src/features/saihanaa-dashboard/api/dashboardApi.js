@@ -1,5 +1,4 @@
-export const API_BASE_URL =
-  import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:5050/api/v1'
+import { apiRequest } from '../../../config/api'
 
 export const emptyAnalytics = {
   summary: {
@@ -20,12 +19,6 @@ export const emptyAnalytics = {
 }
 
 export async function fetchDashboardAnalytics(signal) {
-  const response = await fetch(`${API_BASE_URL}/dashboard/analytics`, { signal })
-
-  if (!response.ok) {
-    throw new Error('Dashboard дата татахад алдаа гарлаа')
-  }
-
-  const data = await response.json()
-  return data.data || data.analytics || emptyAnalytics
+  const payload = await apiRequest('/dashboard/analytics', { signal })
+  return payload.data || payload.analytics || emptyAnalytics
 }

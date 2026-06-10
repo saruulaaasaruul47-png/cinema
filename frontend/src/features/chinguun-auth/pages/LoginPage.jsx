@@ -3,6 +3,18 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import '../styles/auth.css'
 
+const POSTERS = [
+  'https://image.tmdb.org/t/p/original/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg',
+  'https://image.tmdb.org/t/p/original/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
+  'https://image.tmdb.org/t/p/original/qJ2tW6WMUDux911r6m7haRef0WH.jpg',
+]
+
+const FEATURED = [
+  { title: 'Dune: Part Two', genre: 'Sci-Fi' },
+  { title: 'Interstellar', genre: 'Adventure' },
+  { title: 'The Dark Knight', genre: 'Action' },
+]
+
 export default function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -12,7 +24,7 @@ export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const regexEmail = /@/
+  const [bgIdx, setBgIdx] = useState(0)
 
   const handleChange = (e) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }))
@@ -25,11 +37,6 @@ export default function LoginPage() {
       setError('И-мэйл болон нууц үгээ оруулна уу')
       return
     }
-    // if (!regexEmail.test(form.email)) {
-    //   setError('И-мэйл хаяг байна')
-    //   console.log("@ байхгүй байна")
-    //   return
-    // }
     setLoading(true)
     try {
       await login(form.email, form.password)
@@ -43,30 +50,73 @@ export default function LoginPage() {
 
   return (
     <div className="auth-page">
-      <div className="auth-bg">
-        <div className="auth-bg-reel" />
-        <div className="auth-bg-reel reel-2" />
-        <div className="auth-film-strip" />
+      {/* LEFT — Hero */}
+      <div className="auth-hero">
+        <div className="auth-hero-bg" style={{ backgroundImage: `url('${POSTERS[bgIdx]}')` }} />
+        <div className="auth-hero-overlay" />
+        <div className="auth-hero-content">
+          <div className="auth-hero-tag">
+            🎬 &nbsp;Now Showing
+          </div>
+          <h2 className="auth-hero-title">
+            Your Cinema.<br />
+            <span>Your Tickets.</span>
+          </h2>
+          <p className="auth-hero-desc">
+            Монголын хамгийн том кино театрын захиалгын систем.
+            Суудал сонгоод, тасалбараа захиалаарай.
+          </p>
+          <div className="auth-hero-stats">
+            <div>
+              <div className="auth-hero-stat-num">12+</div>
+              <div className="auth-hero-stat-lbl">Танхим</div>
+            </div>
+            <div>
+              <div className="auth-hero-stat-num">50+</div>
+              <div className="auth-hero-stat-lbl">Кино</div>
+            </div>
+            <div>
+              <div className="auth-hero-stat-num">1K+</div>
+              <div className="auth-hero-stat-lbl">Захиалга</div>
+            </div>
+          </div>
+          <div className="auth-hero-movies">
+            {FEATURED.map((m, i) => (
+              <div
+                key={m.title}
+                className="auth-hero-pill"
+                onClick={() => setBgIdx(i)}
+                style={{ opacity: bgIdx === i ? 1 : 0.65 }}
+              >
+                <span className="auth-hero-pill-dot" />
+                {m.title}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <div className="auth-card">
+      {/* RIGHT — Form */}
+      <div className="auth-panel">
         <div className="auth-brand">
-          <span className="auth-brand-icon">🎬</span>
+          <div className="auth-brand-logo">🎬</div>
           <span className="auth-brand-name">CinemaBook</span>
         </div>
 
-        <h1 className="auth-title">Нэвтрэх</h1>
-        <p className="auth-subtitle">Тасалбараа захиалахын тулд нэвтэрнэ үү</p>
+        <div className="auth-heading">
+          <h1>Нэвтрэх</h1>
+          <p>Бүртгэлтэй хэрэглэгчийн и-мэйл, нууц үгээр нэвтрэнэ үү</p>
+        </div>
 
         {error && (
-          <div className="auth-error" role="alert">
+          <div className="auth-error">
             <span>⚠</span> {error}
           </div>
         )}
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className="auth-field">
-            <label htmlFor="email">И-мэйл</label>
+            <label htmlFor="email">И-мэйл хаяг</label>
             <input
               id="email"
               name="email"
@@ -94,13 +144,12 @@ export default function LoginPage() {
           </div>
 
           <button className="auth-btn" type="submit" disabled={loading}>
-            {loading ? <span className="auth-spinner-sm" /> : 'Нэвтрэх'}
+            {loading ? <span className="auth-spinner-sm" /> : 'Нэвтрэх →'}
           </button>
         </form>
 
         <p className="auth-footer">
-          Бүртгэл байхгүй юу?{' '}
-          <Link to="/register">Бүртгүүлэх</Link>
+          Нэвтрэх эрх авах бол системийн <strong style={{ color: 'var(--c-muted)' }}>Admin</strong>-тай холбогтун
         </p>
       </div>
     </div>

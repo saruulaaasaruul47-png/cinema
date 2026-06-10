@@ -1,16 +1,6 @@
-const API = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:5050/api/v1'
+import { apiRequest } from '../../../config/api'
 
-const request = async (endpoint, options = {}) => {
-  const res = await fetch(`${API}${endpoint}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    credentials: 'include',
-    ...options,
-  })
-
-  const data = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(data.message || data.error || 'Алдаа гарлаа')
-  return data
-}
+const request = (endpoint, options = {}) => apiRequest(endpoint, options)
 
 export const authApi = {
   register: (body) =>
@@ -19,6 +9,9 @@ export const authApi = {
   login: (body) =>
     request('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
 
+  adminLogin: (body) =>
+    request('/auth/admin-login', { method: 'POST', body: JSON.stringify(body) }),
+
   logout: () =>
     request('/auth/logout', { method: 'POST' }),
 
@@ -26,9 +19,7 @@ export const authApi = {
     request('/auth/refresh', { method: 'POST' }),
 
   getProfile: (token) =>
-    request('/users/profile', {
-      headers: { Authorization: `Bearer ${token}` },
-    }),
+    request('/users/profile', { headers: { Authorization: `Bearer ${token}` } }),
 
   updateProfile: (token, body) =>
     request('/users/profile', {
