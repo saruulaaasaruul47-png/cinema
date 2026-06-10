@@ -5,15 +5,6 @@ import MoviesPage from "@/pages/MoviesPage.jsx";
 import MovieDetailPage from "@/pages/MovieDetailPage.jsx";
 import SeatSelectionPage from "@/pages/SeatSelectionPage.jsx";
 import { ShowtimesPage, ComingSoonPage, BookingHistoryPage, LoginPage } from "@/pages/OtherPages.jsx";
-import { useAuth } from "@/context/AuthContext.jsx";
-import AdminDashboard from "@/adminDashboard/App.jsx";
-
-function AdminRoute() {
-  const { loading, canUseAdmin } = useAuth();
-
-  if (loading) return null;
-  return canUseAdmin ? <AdminDashboard /> : <LoginPage defaultAdmin />;
-}
 
 function Router() {
   const { page, pageParam } = useApp();
@@ -27,8 +18,6 @@ function Router() {
     "coming-soon": <ComingSoonPage />,
     history:       <BookingHistoryPage />,
     login:         <LoginPage />,
-    "admin-login": <LoginPage defaultAdmin />,
-    admin:         <AdminRoute />,
   };
 
   return routes[page] || <HomePage />;

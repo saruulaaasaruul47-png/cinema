@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cinema-red: #E50914;
+  --color-cinema-red-dark: #b0060f;
+  --color-cinema-bg: #0a0a0a;
+  --color-cinema-card: #111111;
+  --color-cinema-card2: #1a1a1a;
+  --color-cinema-border: #2a2a2a;
+  --color-cinema-text: #ffffff;
+  --color-cinema-muted: #888888;
+  --font-family-display: "Bebas Neue", sans-serif;
+  --font-family-body: "DM Sans", sans-serif;
+  --font-family-mono: "JetBrains Mono", monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --red: #E50914; --red-dark: #b8070f;
+  --red-glow: rgba(229,9,20,0.35); --red-dim: rgba(229,9,20,0.12);
+  --bg: #080808; --surface: #111; --card: #161616;
+  --border: rgba(255,255,255,0.07);
+  --text: #f5f5f5; --text-dim: #aaa; --text-faint: #666; --text-ghost: #444;
+  --font-display: 'Bebas Neue', cursive;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --radius: 12px; --radius-sm: 8px; --radius-lg: 16px;
+}
+
+html { background: var(--bg); color: var(--text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+body { margin: 0; min-height: 100vh; }
+button { cursor: pointer; border: none; background: none; font: inherit; }
+input, select, textarea { font: inherit; }
+a { text-decoration: none; color: inherit; }
+img { display: block; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--red); }
+
+@keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+@keyframes heroSlide { from { opacity:0; transform:translateX(-20px); } to { opacity:1; transform:translateX(0); } }
+@keyframes seatPop { 0%{transform:scale(1)} 40%{transform:scale(1.35)} 100%{transform:scale(1)} }
+@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes shimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+
+.animate-fade { animation: fadeIn .4s ease-out both; }
+.animate-hero { animation: heroSlide .6s ease-out both; }

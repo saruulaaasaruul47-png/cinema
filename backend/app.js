@@ -15,6 +15,7 @@ const movieRouter = require("./routes/router.movie");
 const hallsRouter = require("./routes/router.halls");
 const dashboardRouter = require("./routes/router.dashboard");
 const bookingRouter = require("./routes/router.booking");
+const genreRouter = require("./routes/router.genre");
 
 const upload = multer({ dest: "uploads/" });
 
@@ -43,6 +44,7 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/movie", movieRouter);
 app.use("/api/v1/halls", hallsRouter);
 app.use("/api/v1/dashboard", dashboardRouter);
+app.use("/api/v1/genres", genreRouter);
 app.use("/api/v1/bookings", bookingRouter);
 app.use("/api/v1/showtimes", showTimeRoutes);
 

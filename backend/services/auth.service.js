@@ -34,6 +34,15 @@ const generateRefreshToken = (payload) => {
 
 const registerService = async (data) => {
     const { username, email, password, role } = data;
+    const selectedRole = role || "user";
+
+    if (!username || !email || !password) {
+        throw createError("Username, email, password required", 400);
+    }
+
+    if (!["user", "staff", "admin"].includes(selectedRole)) {
+        throw createError("Invalid role", 400);
+    }
 
     const existEmail = await findUserByEmail(email);
     if (existEmail) throw createError("Энэ и-мэйл бүртгэлтэй байна", 409);
@@ -42,7 +51,7 @@ const registerService = async (data) => {
     if (existUsername) throw createError("Энэ хэрэглэгчийн нэр аль хэдийн авагдсан", 409);
 
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-    await createUser(username, email, hashedPassword, role || "user");
+    await createUser(username, email, hashedPassword, selectedRole);
 
     return { message: "Бүртгэл амжилттай" };
 };
